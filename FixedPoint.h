@@ -15,6 +15,13 @@ constexpr uint32 lsnbits(int n){
     return ~((~0u)<<n);
 }
 
+uint64 doubleToU64(double v){
+    uint64 b=(*(uint64*)(&v));
+    uint64 frac=b&lsnbits(52);
+
+    return b;
+}
+
 /*
  32ビットを使って固定小数点を表現する
  */
@@ -31,6 +38,24 @@ class FixedPoint<uint32,bits>{
     public:
         // 二進数データをそのまま指定
         FixedPoint(uint32 dat):data(dat){}
+
+        static Self fromFloat(float v){
+            if (v==0.f) return FixedPoint(0);
+            uint32 b=(*(uint32*)(&v));
+            uint32 frac=b&lsnbits(23);
+            frac=frac|(1<<23);
+            int exp=((b>>23)&lsnbits(8))-127;
+
+            int offset=exp-(23-bits);
+
+            if (offset>=0){
+                frac<<=offset;
+            }else{
+                frac>>=(-offset);
+            }
+
+            return FixedPoint(frac);
+        }
 
         Self operator+(const Self& another) const noexcept{
             uint32 tmp=another.data+this->data;
@@ -54,6 +79,10 @@ class FixedPoint<uint32,bits>{
             return FixedPoint(tmp);
         }
 
+        bool operator==(const Self& another) const noexcept{
+            return this->data==another.data;
+        }
+
         double toDouble() const{
             if (data==0) return 0.;
 
@@ -66,7 +95,7 @@ class FixedPoint<uint32,bits>{
 
             uint64 frac=lsnbits(exppart)&data;
 
-            frac<<=(51-exppart);
+            frac<<=(52-exppart);
             exppart-=bits;
             exppart+=1023;
             uint64 value=(exppart<<52)|frac;
