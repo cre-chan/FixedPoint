@@ -5,7 +5,9 @@
             "label": "C/C++: clang++ アクティブなファイルのビルド",
             "command": "make",
             "args": [
-                "compile"
+                "compile",
+                "file=${file}",
+                "output=${fileBasenameNoExtension}.out"
             ],
             "options": {
                 "cwd": "${fileDirname}"

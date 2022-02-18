@@ -1,3 +1,3 @@
 
-compile: main.cxx FixedPoint.cxx 
-	clang++ ./main.cxx -o main.out -std=c++17 -lc++ -I . -g -fdiagnostics-color=always
+compile: main.cxx FixedPoint.h 
+	clang++ ${file} -o ${output} -std=c++17 -lc++ -I . -g -fdiagnostics-color=always
