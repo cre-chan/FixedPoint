@@ -39,7 +39,7 @@ class FixedPoint<uint32,bits>{
         }
 
         Self operator*(const Self& another) const noexcept{
-            uint64 tmp=this->data*another.data;
+            uint64 tmp=((uint64)this->data)*((uint64)another.data);
             tmp>>=bits;
             return FixedPoint(tmp);
         }
