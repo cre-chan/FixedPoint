@@ -49,5 +49,19 @@ int main(){
             cerr<<"abserr="<<abs(v-v2.toDouble())<<endl;
     }
 
+    cout<<"------------"<<endl;
+
+    float minuslist[5]={-0.5,-0.25,-0.3,-0.7,-2.8};
+    for(int i=0;i<5;i++){
+        float v=minuslist[i];
+        FixedPoint<uint32,8> v2=FixedPoint<uint32,8>::fromFloat(v);
+        cout<<v<<" "<<v2<<endl;
+        const double eps=1./(1<<8);
+        double diff=abs(v-v2.toDouble());
+
+        if (diff>=eps)
+            cerr<<"abserr="<<abs(v-v2.toDouble())<<endl;
+    }
+
     return 0;
 }

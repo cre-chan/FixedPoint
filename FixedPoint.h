@@ -15,13 +15,6 @@ constexpr uint32 lsnbits(int n){
     return ~((~0u)<<n);
 }
 
-uint64 doubleToU64(double v){
-    uint64 b=(*(uint64*)(&v));
-    uint64 frac=b&lsnbits(52);
-
-    return b;
-}
-
 /*
  32ビットを使って固定小数点を表現する
  */
@@ -41,11 +34,20 @@ class FixedPoint<uint32,bits>{
 
         static Self fromFloat(float v){
             if (v==0.f) return FixedPoint(0);
+            // vの中身をそのままbにコピー
             uint32 b=(*(uint32*)(&v));
+            // 単精度浮動小数の仮数は下23位
             uint32 frac=b&lsnbits(23);
+            // 負の数に対応するため
+            uint32 sign=(1u<<31)&b;
+            // 仮数に省略された1を補足
             frac=frac|(1<<23);
+            // 指数部の桁履きをなくす
             int exp=((b>>23)&lsnbits(8))-127;
-
+            
+            // 左にシフトのビット数を算出
+            // 今小数点は23ビットにいる
+            // なので左にexp位シフトした後右に23-bitsビットシフトすべき
             int offset=exp-(23-bits);
 
             if (offset>=0){
@@ -53,6 +55,8 @@ class FixedPoint<uint32,bits>{
             }else{
                 frac>>=(-offset);
             }
+
+            if (sign!=0) frac=-frac;
 
             return FixedPoint(frac);
         }
@@ -68,14 +72,39 @@ class FixedPoint<uint32,bits>{
         }
 
         Self operator*(const Self& another) const noexcept{
-            uint64 tmp=((uint64)this->data)*((uint64)another.data);
+            uint32 op1=this->data,op2=another.data;
+            int sign=0;
+            if (op1&(1<<31)) {
+                sign++;
+                op1=-op1;
+            }
+            if (op2&(1<<31)) {
+                sign++;
+                op2=-op2;
+            }
+
+            uint64 tmp=((uint64)op1)*((uint64)op2);
+            
             tmp>>=bits;
+            if (sign%2) tmp=-tmp;
             return FixedPoint(tmp);
         }
 
         Self operator/(const Self& another) const{
-            uint64 tmp=this->data/another.data;
-            tmp<<=bits;
+            uint32 op1=this->data,op2=another.data;
+            int sign=0;
+            if (op1&(1<<31)) {
+                sign++;
+                op1=-op1;
+            }
+            if (op2&(1<<31)) {
+                sign++;
+                op2=-op2;
+            }
+            uint64 tmp=(((uint64)op1)<<32)/op2;
+            int offset=32-bits;
+            tmp>>=offset;
+            if (sign%2) tmp=-tmp;
             return FixedPoint(tmp);
         }
 
@@ -86,19 +115,33 @@ class FixedPoint<uint32,bits>{
         double toDouble() const{
             if (data==0) return 0.;
 
+            
             uint64 exppart=0;
             uint32 tmp=data;
+            uint32 sign=(1<<31)&data;
+            // 負の数の場合に対応
+            if (sign!=0) tmp=-tmp;
+
+            uint32 dataDup=tmp;
+
             while(tmp>1) {
                 exppart++;
                 tmp>>=1;
             }
 
-            uint64 frac=lsnbits(exppart)&data;
+            
+
+            uint64 frac=lsnbits(exppart)&dataDup;
 
             frac<<=(52-exppart);
             exppart-=bits;
             exppart+=1023;
             uint64 value=(exppart<<52)|frac;
+
+            // 符号ビットを設定する
+            // ullを使うことで63ビットのシフトを許す
+            if (sign) value|=(1ull<<63);
+            
             double ret;
             // ポインタを使って型変換を回避
             *((uint64*)(&ret))=value;
@@ -111,7 +154,11 @@ class FixedPoint<uint32,bits>{
             return out;
         }
 
-        // friend ostream& operator<<(ostream& out,const Self& n){
+        
+};
+
+
+// friend ostream& operator<<(ostream& out,const Self& n){
         //     const uint32 digits=31-bits;
 
         //     // 整数部を取り出す
@@ -133,4 +180,3 @@ class FixedPoint<uint32,bits>{
 
         //     return out;
         // }
-};
