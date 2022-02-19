@@ -115,7 +115,6 @@ class FixedPoint<uint32,bits>{
         double toDouble() const{
             if (data==0) return 0.;
 
-            
             uint64 exppart=0;
             uint32 tmp=data;
             uint32 sign=(1<<31)&data;
@@ -156,6 +155,10 @@ class FixedPoint<uint32,bits>{
 
         
 };
+
+// 32ビット固定小数点小数の略称
+template<uint32 bits>
+using FP32=FixedPoint<uint32,bits>;
 
 
 // friend ostream& operator<<(ostream& out,const Self& n){
