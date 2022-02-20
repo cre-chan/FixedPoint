@@ -267,23 +267,36 @@ class FixedPoint<uint64,bits>{
         //     return FixedPoint(tmp);
         // }
 
-        // Self operator/(const Self& another) const{
-        //     uint32 op1=this->data,op2=another.data;
-        //     int sign=0;
-        //     if (op1&(1<<31)) {
-        //         sign++;
-        //         op1=-op1;
-        //     }
-        //     if (op2&(1<<31)) {
-        //         sign++;
-        //         op2=-op2;
-        //     }
-        //     uint64 tmp=(((uint64)op1)<<32)/op2;
-        //     int offset=32-bits;
-        //     tmp>>=offset;
-        //     if (sign%2) tmp=-tmp;
-        //     return FixedPoint(tmp);
-        // }
+        Self operator/(const Self& another) const{
+            uint64 op1=this->data,op2=another.data;
+            int sign=0;
+            if (op1&(1<<31)) {
+                sign++;
+                op1=-op1;
+            }
+            if (op2&(1<<31)) {
+                sign++;
+                op2=-op2;
+            }
+
+            uint64 interger=op1/op2,frac=0;
+            op1%=op2;
+            for(int i=0;i<64;i++){
+                frac<<=1;
+                op1<<=1;
+                uint64 v=op1/op2;
+                frac|=v;
+                
+                op1%=op2;
+            }
+
+            uint64 ret=0;
+            ret|=(interger<<bits);
+            ret|=(frac>>(64-bits));
+
+            if (sign%2) ret=-ret;
+            return FixedPoint(ret);
+        }
 
         bool operator==(const Self& another) const noexcept{
             return this->data==another.data;

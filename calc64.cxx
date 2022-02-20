@@ -48,6 +48,22 @@ int main(){
             cerr<<"abserr="<<abserr<<endl;
     }
 
+    cout<<"------------------"<<endl;
+
+
+    // FP64で割り算を行う
+    // 参考値 実際値　を一行に出力
+    for(int i=0;i<5;i++){
+        float v1=operand1[i],v2=operand2[i];
+        float ans=v1/v2;
+        auto v3=FP64<16>::fromFloat(v1),v4=FP64<16>::fromFloat(v2);
+
+        auto tmp=v3/v4;
+        cout<<ans<<" "<<tmp<<endl;
+        double abserr=abs(ans-tmp.toDouble());
+        cout<<"abserr="<<abserr<<endl;
+    }
+
 
     return 0;
 }
