@@ -294,6 +294,10 @@ class FixedPoint<uint64,bits>{
             ret|=(interger<<bits);
             ret|=(frac>>(64-bits));
 
+            // 切り捨てによる精度損失を保障
+            uint64 omitted=(frac>>(64-bits-1))&1;
+            if (omitted) ret+=1;
+
             if (sign%2) ret=-ret;
             return FixedPoint(ret);
         }
