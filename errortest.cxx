@@ -28,7 +28,7 @@ int main(){
         float v=errlist[i];
         FixedPoint<uint32,4> v2=FixedPoint<uint32,4>::fromFloat(v);
         cout<<v<<" "<<v2<<endl;
-        const double eps=1./(1<<4);
+        const double eps=1./(1<<5);
         double diff=abs(v-v2.toDouble());
 
         if (diff>=eps)
@@ -42,7 +42,7 @@ int main(){
         float v=errlist[i];
         FixedPoint<uint32,8> v2=FixedPoint<uint32,8>::fromFloat(v);
         cout<<v<<" "<<v2<<endl;
-        const double eps=1./(1<<8);
+        const double eps=1./(1<<9);
         double diff=abs(v-v2.toDouble());
 
         if (diff>=eps)

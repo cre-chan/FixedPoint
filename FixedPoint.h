@@ -20,7 +20,7 @@ constexpr uint64 lsnbits(int n){
  */
 template<uint32 bits>
 class FixedPoint<uint32,bits>{
-    static_assert(bits<=32,"Cannot specify more than 32 bits to represents float parts.");
+    static_assert(bits<=31,"Cannot specify more than 31 bits to represents float parts.");
 
     using Self=FixedPoint<uint32,bits>;
 
@@ -53,7 +53,10 @@ class FixedPoint<uint32,bits>{
             if (offset>=0){
                 frac<<=offset;
             }else{
+                // シフトで省略されたbitの値を取得
+                uint32 ommited=((frac>>(-offset-1))&1u);
                 frac>>=(-offset);
+                if (ommited) frac++;
             }
 
             if (sign!=0) frac=-frac;
@@ -161,7 +164,7 @@ class FixedPoint<uint32,bits>{
  */
 template<uint32 bits>
 class FixedPoint<uint64,bits>{
-    static_assert(bits<=64,"Cannot specify more than 64 bits to represents float parts.");
+    static_assert(bits<=63,"Cannot specify more than 63 bits to represents float parts.");
 
     using Self=FixedPoint<uint64,bits>;
 
@@ -194,7 +197,9 @@ class FixedPoint<uint64,bits>{
             if (offset>=0){
                 frac<<=offset;
             }else{
+                uint32 lastbit=((frac>>(-offset-1))&1u);
                 frac>>=(-offset);
+                if (lastbit!=0) frac++;
             }
 
             if (sign!=0) frac=-frac;
@@ -231,15 +236,15 @@ class FixedPoint<uint64,bits>{
             return FixedPoint(frac);
         }
 
-        // Self operator+(const Self& another) const noexcept{
-        //     uint32 tmp=another.data+this->data;
-        //     return FixedPoint(tmp);
-        // }
+        Self operator+(const Self& another) const noexcept{
+            uint64 tmp=another.data+this->data;
+            return FixedPoint(tmp);
+        }
 
-        // Self operator-(const Self& another) const noexcept{
-        //     uint32 tmp=this->data-another.data;
-        //     return FixedPoint(tmp);
-        // }
+        Self operator-(const Self& another) const noexcept{
+            uint64 tmp=this->data-another.data;
+            return FixedPoint(tmp);
+        }
 
         // Self operator*(const Self& another) const noexcept{
         //     uint32 op1=this->data,op2=another.data;
@@ -278,9 +283,9 @@ class FixedPoint<uint64,bits>{
         //     return FixedPoint(tmp);
         // }
 
-        // bool operator==(const Self& another) const noexcept{
-        //     return this->data==another.data;
-        // }
+        bool operator==(const Self& another) const noexcept{
+            return this->data==another.data;
+        }
 
         double toDouble() const{
             if (data==0) return 0.;

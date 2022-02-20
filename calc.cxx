@@ -19,7 +19,7 @@ int main(){
         cout<<ans<<" "<<tmp<<endl;
         double abserr=abs((ansFixed-tmp).toDouble());
         // オーバーフローがない場合は変換誤差のみ考える
-        if (abserr>(op1err+op2err))
+        if (abserr>(1./(1<<7)))
             cerr<<"abserr="<<abserr<<endl;
     }
 
