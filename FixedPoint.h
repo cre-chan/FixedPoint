@@ -228,7 +228,9 @@ class FixedPoint<uint64,bits>{
             if (offset>=0){
                 frac<<=offset;
             }else{
+                uint32 ommited=((frac>>(-offset-1))&1u);
                 frac>>=(-offset);
+                if (ommited) frac++;
             }
 
             if (sign!=0) frac=-frac;
