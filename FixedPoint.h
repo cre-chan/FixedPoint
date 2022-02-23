@@ -169,7 +169,7 @@ class FixedPoint<uint64,bits>{
     using Self=FixedPoint<uint64,bits>;
 
     private:
-        // シフト操作の挙動を限定するために符号なし32ビット整数を使う
+        // シフト操作の挙動を限定するために符号なし64ビット整数を使う
         uint64 data;
 
     public:
@@ -248,26 +248,7 @@ class FixedPoint<uint64,bits>{
             return FixedPoint(tmp);
         }
 
-        // Self operator*(const Self& another) const noexcept{
-        //     uint32 op1=this->data,op2=another.data;
-        //     int sign=0;
-        //     if (op1&(1<<31)) {
-        //         sign++;
-        //         op1=-op1;
-        //     }
-        //     if (op2&(1<<31)) {
-        //         sign++;
-        //         op2=-op2;
-        //     }
-
-        //     uint64 tmp=((uint64)op1)*((uint64)op2);
-            
-        //     tmp>>=bits;
-        //     if (sign%2) tmp=-tmp;
-        //     return FixedPoint(tmp);
-        // }
-
-        Self operator/(const Self& another) const{
+        Self operator*(const Self& another) const noexcept{
             uint64 op1=this->data,op2=another.data;
             int sign=0;
             if (op1&(1<<31)) {
@@ -275,6 +256,41 @@ class FixedPoint<uint64,bits>{
                 op1=-op1;
             }
             if (op2&(1<<31)) {
+                sign++;
+                op2=-op2;
+            }
+
+            uint64 up=0,down=0;
+
+            for(int i=0;i<64;i++){
+                if (((1ull<<i)&op2)==0) continue;
+                uint64 down2=op1<<i,up2=op1>>(63-i);
+                uint64 newdown=down2+down;
+                uint64 downsign=(1ull<<63)&down,
+                    down2sign=(1ull<<63)&down2,
+                    newdownsign=(1ull<<63)&newdown; 
+
+                bool overflowed=(downsign&&down2sign&&!newdownsign)||(!downsign&&!down2sign&&newdownsign);
+                down=newdown;
+                up+=up2;
+                if (overflowed) up++;
+            }
+
+            uint64 tmp=down>>bits;
+            tmp|=(lsnbits(bits)&up)<<(64-bits);
+
+            if (sign%2) tmp=-tmp;
+            return FixedPoint(tmp);
+        }
+
+        Self operator/(const Self& another) const{
+            uint64 op1=this->data,op2=another.data;
+            int sign=0;
+            if (op1&(1ull<<63)) {
+                sign++;
+                op1=-op1;
+            }
+            if (op2&(1ull<<63)) {
                 sign++;
                 op2=-op2;
             }
@@ -324,7 +340,13 @@ class FixedPoint<uint64,bits>{
 
             uint64 frac=lsnbits(exppart)&dataDup;
 
-            frac<<=(52-exppart);
+            // exppartが52を超える可能性あるので
+            // offsetがプラスとマイナスの場合を分けて処理する
+            const int offset=(52-exppart);
+            if (offset>=0)
+                frac<<=offset;
+            else 
+                frac>>=(-offset);
             exppart-=bits;
             exppart+=1023;
             uint64 value=(exppart<<52)|frac;

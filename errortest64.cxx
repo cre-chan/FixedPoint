@@ -56,7 +56,7 @@ int main(){
         float abserr=abs(a.toDouble()-v);
         // nビットで小数部を表す時に誤差は1/(2^n+1)以下
         // 誤差が出る場合切り捨てが正しく行われてない可能性ある
-        if (abserr>=(1./(1<<17)))
+        if (abserr>(1./(1<<17)))
             cout<<"abserr="<<abserr<<endl;
     }
 
@@ -71,6 +71,20 @@ int main(){
         float abserr=abs(a.toDouble()-v);
         // doubleacclistの要素はぴったり表現できるはず
         if (abserr>0.)
+            cerr<<"abserr="<<abserr<<endl;
+    }
+
+    cout<<"--------------"<<endl;
+
+    // 32ビットに収まらない小数の変換テスト
+    double overflowlist[5]={1.2345e10,-1.3e10,(1.56e12+0.6),-(1.56e12+0.6),(1.56e11+0.75)};
+    for(int i=0;i<5;i++){
+        double v=overflowlist[i];
+        FP64<16> a=FP64<16>::fromDouble(v);
+        cout<<v<<" "<<a<<endl;
+        float abserr=abs(a.toDouble()-v);
+        // doubleacclistの要素はぴったり表現できるはず
+        if (abserr>(1./(1<<17)))
             cerr<<"abserr="<<abserr<<endl;
     }
 
