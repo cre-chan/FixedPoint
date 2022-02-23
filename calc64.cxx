@@ -61,6 +61,40 @@ int main(){
         auto tmp=v3/v4;
         cout<<ans<<" "<<tmp<<endl;
         double abserr=abs(ans-tmp.toDouble());
+        if (abserr>(1./(1<<16)))
+            cout<<"abserr="<<abserr<<endl;
+    }
+
+    cout<<"------------------"<<endl;
+
+    // FP64で掛け算を行う
+    // 参考値 実際値　を一行に出力
+    for(int i=0;i<5;i++){
+        float v1=operand1[i],v2=operand2[i];
+        float ans=v1*v2;
+        auto v3=FP64<16>::fromFloat(v1),v4=FP64<16>::fromFloat(v2);
+
+        auto tmp=v3*v4;
+        cout<<ans<<" "<<tmp<<endl;
+        double abserr=abs(ans-tmp.toDouble());
+        if (abserr>(1./(1<<16)))
+            cout<<"abserr="<<abserr<<endl;
+    }
+
+    // 結果が64ビットをオーバーする
+    double overflow1[5]={10000.5,-2000.5,2000.56,1234.567,-5000.5};
+    double overflow2[5]={10000.5,-2000.5,-1200,1234.567,3600.7};
+
+    cout<<"------------------"<<endl;
+
+    for(int i=0;i<5;i++){
+        double v1=overflow1[i],v2=overflow2[i];
+        double ans=v1*v2;
+        auto v3=FP64<12>::fromFloat(v1),v4=FP64<12>::fromFloat(v2);
+
+        auto tmp=v3*v4;
+        cout<<ans<<" "<<tmp<<endl;
+        double abserr=abs(ans-tmp.toDouble());
         cout<<"abserr="<<abserr<<endl;
     }
 
