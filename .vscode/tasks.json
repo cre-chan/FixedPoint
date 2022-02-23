@@ -7,10 +7,10 @@
             "args": [
                 "compile",
                 "file=${file}",
-                "output=${fileBasenameNoExtension}.out"
+                "output=${fileDirname}/${fileBasenameNoExtension}.out"
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${workspaceRoot}"
             },
             "problemMatcher": [
                 "$gcc"
