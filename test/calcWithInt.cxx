@@ -83,6 +83,28 @@ void test4(){
     }
 }
 
+void test5(){
+    /*
+    整数と固定小数点小数の掛け算
+     */
+    float op1[5]={0.,3.,-5.5,5.6,-7.};
+    int op2[5]={1,-2,3,3,5};
+
+    for(int i=0;i<5;i++){
+        float v1=op1[i];
+        int v2=op2[i];
+        
+        FP32<4> v3=FP32<4>::fromFloat(v1);
+        auto tmp=v3/v2;
+        // 掛け算の誤差計算に要注意
+        float ans=v3.toDouble()/v2;
+        cout<<ans<<" "<<tmp<<endl;
+        const double abserr=abs(tmp.toDouble()-ans);
+        if (abserr>(1./(1<<5)))
+            cout<<"abserr="<<abserr<<endl;
+    }
+}
+
 int main(){
     
 
@@ -93,6 +115,8 @@ int main(){
     test3();
     cout<<"-------------------"<<endl;
     test4();
+    cout<<"-------------------"<<endl;
+    test5();
     
 
     return 0;
