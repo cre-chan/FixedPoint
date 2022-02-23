@@ -35,7 +35,7 @@ class FixedPoint<uint32,bits>{
 
     using Self=FixedPoint<uint32,bits>;
 
-    private:
+    public:
         // シフト操作の挙動を限定するために符号なし32ビット整数を使う
         uint32 data;
 
@@ -122,6 +122,14 @@ class FixedPoint<uint32,bits>{
 
         bool operator==(const Self& another) const noexcept{
             return this->data==another.data;
+        }
+
+        template<uint32 len>
+        bool operator<=(const FixedPoint<uint32,len>& another) const noexcept{
+            const uint32 thisint=this->data>>bits,anotherint=another.data>>len;
+            const uint32 thisfrac=this->data<<(31-bits),anotherfrac=another.data<<(31-len);
+
+            return (thisint<anotherint)||((thisint==anotherint)&&(thisfrac<=anotherfrac));
         }
 
         double toDouble() const{
