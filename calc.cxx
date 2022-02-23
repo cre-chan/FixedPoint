@@ -33,13 +33,15 @@ int main(){
     // 参考値 実際値　を一行に出力
     for(int i=0;i<5;i++){
         float v1=operand1[i],v2=operand2[i];
-        float ans=v1*v2;
+        
         FixedPoint<uint32,8> v3=FixedPoint<uint32,8>::fromFloat(v1),v4=FixedPoint<uint32,8>::fromFloat(v2);
 
-        FixedPoint<uint32,8> tmp=v3*v4,ansFixed=FixedPoint<uint32,8>::fromFloat(ans);
+        FixedPoint<uint32,8> tmp=v3*v4;
+        float ans=v3.toDouble()*v4.toDouble();
         cout<<ans<<" "<<tmp<<endl;
-        double abserr=abs((ansFixed-tmp).toDouble());
-        cout<<"abserr="<<abserr<<endl;
+        double abserr=abs(ans-tmp.toDouble());
+        if (abserr>(1./(1<<8)))
+            cout<<"abserr="<<abserr<<endl;
     }
 
     cout<<"------------------"<<endl;
@@ -48,13 +50,15 @@ int main(){
     // 参考値 実際値　を一行に出力
     for(int i=0;i<5;i++){
         float v1=operand1[i],v2=operand2[i];
-        float ans=v1/v2;
+        // float ans=v1/v2;
         FixedPoint<uint32,16> v3=FixedPoint<uint32,16>::fromFloat(v1),v4=FixedPoint<uint32,16>::fromFloat(v2);
 
-        FixedPoint<uint32,16> tmp=v3/v4,ansFixed=FixedPoint<uint32,16>::fromFloat(ans);
+        FixedPoint<uint32,16> tmp=v3/v4;
+        float ans=v3.toDouble()/v4.toDouble();
         cout<<ans<<" "<<tmp<<endl;
-        double abserr=abs((ansFixed-tmp).toDouble());
-        cout<<"abserr="<<abserr<<endl;
+        double abserr=abs(ans-tmp.toDouble());
+        if (abserr>(1./(1<<8)))
+            cout<<"abserr="<<abserr<<endl;
     }
 
 
