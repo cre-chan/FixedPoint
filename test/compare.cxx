@@ -104,6 +104,25 @@ void test5(){
     }
 }
 
+void test6(){
+    // >=が正しく実装されたかをチェック
+    float op1[5]={-0.,0.,-1.5,0.5+(1./16),-5.6};
+    float op2[5]={3.,0.3,1.5,-0.5,-3.};
+
+    for(int i=0;i<5;i++){
+        float v1=op1[i],v2=op2[i];
+        float ans=v1+v2;
+        FP64<4> v3=FP64<4>::fromFloat(v1);
+        auto v4=FP64<2>::fromFloat(v2);
+
+        if ((v1>=v2)==(v3>=v4)){
+            cout<<"passed "<<i<<endl;
+        }else{
+            cout<<"failed "<<i<<v1<<">"<<v2<<endl;
+        }
+    }
+}
+
 int main(){
     
 
@@ -116,6 +135,8 @@ int main(){
     test4();
     cout<<"-------------------"<<endl;
     test5();
+    cout<<"-------------------"<<endl;
+    test6();
 
     return 0;
 }

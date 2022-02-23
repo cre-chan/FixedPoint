@@ -122,6 +122,11 @@ class FixedPoint<uint32,bits>{
             return thisdata<=anotherdata;
         }
 
+        template<uint32 len>
+        bool operator>=(const FixedPoint<uint32,len>& another) const noexcept{
+            return another<=*this;
+        }
+
         double toDouble() const{
             if (data==0) return 0.;
 
