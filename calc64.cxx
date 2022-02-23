@@ -55,10 +55,13 @@ int main(){
     // 参考値 実際値　を一行に出力
     for(int i=0;i<5;i++){
         float v1=operand1[i],v2=operand2[i];
-        float ans=v1/v2;
+        // float ans=v1/v2;
         auto v3=FP64<16>::fromFloat(v1),v4=FP64<16>::fromFloat(v2);
 
         auto tmp=v3/v4;
+        // 変換誤差は乗算する時に拡大されるため
+        // 参考値は変換後の値の計算結果を採用
+        float ans=v3.toDouble()/v4.toDouble();
         cout<<ans<<" "<<tmp<<endl;
         double abserr=abs(ans-tmp.toDouble());
         if (abserr>(1./(1<<16)))
@@ -71,8 +74,11 @@ int main(){
     // 参考値 実際値　を一行に出力
     for(int i=0;i<5;i++){
         float v1=operand1[i],v2=operand2[i];
-        float ans=v1*v2;
+        
         auto v3=FP64<16>::fromFloat(v1),v4=FP64<16>::fromFloat(v2);
+        // 変換誤差は乗算する時に拡大されるため
+        // 参考値は変換後の値の計算結果を採用
+        float ans=v3.toDouble()*v4.toDouble();
 
         auto tmp=v3*v4;
         cout<<ans<<" "<<tmp<<endl;
@@ -89,13 +95,17 @@ int main(){
 
     for(int i=0;i<5;i++){
         double v1=overflow1[i],v2=overflow2[i];
-        double ans=v1*v2;
-        auto v3=FP64<12>::fromFloat(v1),v4=FP64<12>::fromFloat(v2);
+        // double ans=v1*v2;
+        auto v3=FP64<8>::fromFloat(v1),v4=FP64<8>::fromFloat(v2);
 
         auto tmp=v3*v4;
+        // 変換誤差は乗算する時に拡大されるため
+        // 参考値は変換後の値の計算結果を採用
+        double ans=v3.toDouble()*v4.toDouble();
         cout<<ans<<" "<<tmp<<endl;
         double abserr=abs(ans-tmp.toDouble());
-        cout<<"abserr="<<abserr<<endl;
+        if (abserr>(1./(1<<8)))
+            cout<<"abserr="<<abserr<<endl;
     }
 
 
