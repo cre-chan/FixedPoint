@@ -6,6 +6,7 @@ using namespace std;
 
 using uint32 = unsigned int;
 using uint64 = unsigned long long int;
+using ll = long long int;
 
 template<class INTLIKE,uint32 bits>
 class FixedPoint;
@@ -24,6 +25,11 @@ ui rsWithCarry(ui value,uint shift){
     value>>=shift;
     if (bit) value++;
     return value;
+}
+bool plusOverflowed(ll a,ll b,ll out){
+    if (a>=0&&b>=0&&out<0) return true;
+    if (a<0&&b<0&&out>=0) return true;
+    return false;
 }
 
 /*
@@ -126,10 +132,19 @@ class FixedPoint<uint32,bits>{
 
         template<uint32 len>
         bool operator<=(const FixedPoint<uint32,len>& another) const noexcept{
-            const uint32 thisint=this->data>>bits,anotherint=another.data>>len;
+            const uint32 thisint=((int)this->data)>>bits,anotherint=((int)another.data)>>len;
             const uint32 thisfrac=this->data<<(31-bits),anotherfrac=another.data<<(31-len);
+            uint64 thisext=thisint*(1ull<<32)+thisfrac,anotherext=anotherint*(1ull<<32)+anotherfrac;
+            long long int diff=anotherext-thisext;
 
-            return (thisint<anotherint)||((thisint==anotherint)&&(thisfrac<=anotherfrac));
+            return diff>=0;
+        }
+
+        // 小数部の長さが同じの場合を特殊処理
+        // 比較を早くできる
+        bool operator<=(const Self& another) const noexcept{
+            int thisdata=this->data,anotherdata=another.data;
+            return thisdata<=anotherdata;
         }
 
         double toDouble() const{
@@ -200,7 +215,7 @@ class FixedPoint<uint64,bits>{
 
     using Self=FixedPoint<uint64,bits>;
 
-    private:
+    public:
         // シフト操作の挙動を限定するために符号なし64ビット整数を使う
         uint64 data;
 
@@ -352,6 +367,24 @@ class FixedPoint<uint64,bits>{
 
         bool operator==(const Self& another) const noexcept{
             return this->data==another.data;
+        }
+
+        template<uint32 len>
+        bool operator<=(const FixedPoint<uint64,len>& another) const noexcept{
+            const uint64 thisint=((long long int)-this->data)>>bits, 
+                anotherint=((long long int)another.data)>>len;
+            const uint64 thisfrac=(-this->data)<<(63-bits),anotherfrac=another.data<<(63-len);
+            long long int diffup=thisint+anotherint,diffdown=thisfrac+anotherfrac;
+
+            if (plusOverflowed(thisfrac,anotherfrac,diffdown)) diffup++;
+            return diffup>=0;
+        }
+
+        // 小数部の長さが同じの場合を特殊処理
+        // 比較を早くできる
+        bool operator<=(const Self& another) const noexcept{
+            long long int thisdata=this->data,anotherdata=another.data;
+            return thisdata<=anotherdata;
         }
 
         double toDouble() const{
