@@ -15,6 +15,17 @@ constexpr uint64 lsnbits(int n){
     return ~((~0ull)<<n);
 }
 
+// valueを右にshiftビットシフトする
+// 誤差を考慮する
+template<class ui>
+ui rsWithCarry(ui value,uint shift){
+    if (shift==0) return value;
+    uint32 bit=((value>>(shift-1))&1u);
+    value>>=shift;
+    if (bit) value++;
+    return value;
+}
+
 /*
  32ビットを使って固定小数点を表現する
  */
@@ -54,9 +65,7 @@ class FixedPoint<uint32,bits>{
                 frac<<=offset;
             }else{
                 // シフトで省略されたbitの値を取得
-                uint32 ommited=((frac>>(-offset-1))&1u);
-                frac>>=(-offset);
-                if (ommited) frac++;
+                frac=rsWithCarry(frac,-offset);
             }
 
             if (sign!=0) frac=-frac;
@@ -131,8 +140,6 @@ class FixedPoint<uint32,bits>{
                 tmp>>=1;
             }
 
-            
-
             uint64 frac=lsnbits(exppart)&dataDup;
 
             frac<<=(52-exppart);
@@ -156,7 +163,24 @@ class FixedPoint<uint32,bits>{
             return out;
         }
 
-        
+        // 小数部の長さを変える
+        // 新しいFPを戻す
+        template<uint32 target>
+        FixedPoint<uint32,target> to() const noexcept{
+            // 符号付き整数を使うことで右シフトの時の符号を処理s
+            long long int tmp=(int)this->data;
+            int sign=tmp>=0;
+            if (!sign) tmp=-tmp;
+            if (target>=bits){
+                tmp<<=(target-bits);
+            }else{
+                tmp=rsWithCarry(tmp,bits-target);
+            }
+
+            if (!sign) tmp=-tmp;
+
+            return FixedPoint<uint32,target>(tmp);
+        }
 };
 
 /*
@@ -367,7 +391,27 @@ class FixedPoint<uint64,bits>{
             return out;
         }
 
-        
+        // 小数部の長さを変える
+        // 新しいFPを戻す
+        template<uint32 target>
+        FixedPoint<uint64,target> to() const noexcept{
+            // 符号付き整数を使うことで右シフトの時の符号を処理s
+            long long int tmp=(int)this->data;
+            int sign=tmp>=0;
+            if (!sign) tmp=-tmp;
+            if (target>=bits){
+                tmp<<=(target-bits);
+            }else{
+                // 誤差を考慮
+                uint32 bit=((tmp>>(bits-target-1))&1u);
+                tmp>>=(bits-target);
+                if (bit) tmp++;
+            }
+
+            if (!sign) tmp=-tmp;
+
+            return FixedPoint<uint64,target>(tmp);
+        }
 };
 
 // 32ビット固定小数点小数の略称
