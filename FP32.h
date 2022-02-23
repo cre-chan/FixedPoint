@@ -83,7 +83,7 @@ class FixedPoint<uint32,bits>{
 
             uint64 tmp=((uint64)op1)*((uint64)op2);
             
-            tmp>>=bits;
+            tmp=rsWithCarry(tmp,bits);
             if (sign%2) tmp=-tmp;
             return FixedPoint(tmp);
         }
@@ -101,7 +101,7 @@ class FixedPoint<uint32,bits>{
             }
             uint64 tmp=(((uint64)op1)<<32)/op2;
             int offset=32-bits;
-            tmp>>=offset;
+            tmp=rsWithCarry(tmp,offset);
             if (sign%2) tmp=-tmp;
             return FixedPoint(tmp);
         }
@@ -125,6 +125,25 @@ class FixedPoint<uint32,bits>{
 
         Self operator-(int other) const noexcept{
             return (*this)-other;
+        }
+
+        Self operator*(int another) const noexcept{
+            uint32 op1=this->data,op2=another;
+            int sign=0;
+            if (op1&(1<<31)) {
+                sign++;
+                op1=-op1;
+            }
+            if (op2&(1<<31)) {
+                sign++;
+                op2=-op2;
+            }
+
+            uint64 tmp=((uint64)op1)*((uint64)op2);
+            
+            // tmp>>=bits;
+            if (sign%2) tmp=-tmp;
+            return FixedPoint(tmp);
         }
 
         template<uint32 len>
@@ -217,4 +236,9 @@ FixedPoint<uint32,bits> operator+(int a,const FixedPoint<uint32,bits>& b){
 template<uint32 bits>
 FixedPoint<uint32,bits> operator-(int a,const FixedPoint<uint32,bits>& b){
     return -b+a;
+}
+
+template<uint32 bits>
+FixedPoint<uint32,bits> operator*(int a,const FixedPoint<uint32,bits>& b){
+    return b*a;
 }

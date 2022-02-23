@@ -123,7 +123,7 @@ class FixedPoint<uint64,bits>{
                 if (overflowed) up++;
             }
 
-            uint64 tmp=down>>bits;
+            uint64 tmp=rsWithCarry(down,bits);
             tmp|=(lsnbits(bits)&up)<<(64-bits);
 
             if (sign%2) tmp=-tmp;
@@ -155,12 +155,9 @@ class FixedPoint<uint64,bits>{
 
             uint64 ret=0;
             ret|=(interger<<bits);
-            ret|=(frac>>(64-bits));
+            ret|=rsWithCarry(frac,(64-bits));
 
-            // 切り捨てによる精度損失を保障
-            uint64 omitted=(frac>>(64-bits-1))&1;
-            if (omitted) ret+=1;
-
+            
             if (sign%2) ret=-ret;
             return FixedPoint(ret);
         }
@@ -249,9 +246,7 @@ class FixedPoint<uint64,bits>{
                 tmp<<=(target-bits);
             }else{
                 // 誤差を考慮
-                uint32 bit=((tmp>>(bits-target-1))&1u);
-                tmp>>=(bits-target);
-                if (bit) tmp++;
+                tmp=rsWithCarry(tmp,bits-target);
             }
 
             if (!sign) tmp=-tmp;

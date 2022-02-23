@@ -64,7 +64,7 @@ int main(){
         float ans=v3.toDouble()/v4.toDouble();
         cout<<ans<<" "<<tmp<<endl;
         double abserr=abs(ans-tmp.toDouble());
-        if (abserr>(1./(1<<16)))
+        if (abserr>(1./(1<<17)))
             cout<<"abserr="<<abserr<<endl;
     }
 
@@ -83,7 +83,7 @@ int main(){
         auto tmp=v3*v4;
         cout<<ans<<" "<<tmp<<endl;
         double abserr=abs(ans-tmp.toDouble());
-        if (abserr>(1./(1<<16)))
+        if (abserr>(1./(1<<17)))
             cout<<"abserr="<<abserr<<endl;
     }
 
@@ -104,7 +104,7 @@ int main(){
         double ans=v3.toDouble()*v4.toDouble();
         cout<<ans<<" "<<tmp<<endl;
         double abserr=abs(ans-tmp.toDouble());
-        if (abserr>(1./(1<<8)))
+        if (abserr>(1./(1<<9)))
             cout<<"abserr="<<abserr<<endl;
     }
 
