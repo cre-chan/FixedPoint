@@ -54,6 +54,11 @@ class FixedPoint<uint32,bits>{
             return FixedPoint(frac);
         }
 
+        // e.g t=-t
+        Self operator-(){
+            return FixedPoint(-data);
+        }
+
         Self operator+(const Self& another) const noexcept{
             uint32 tmp=another.data+this->data;
             return FixedPoint(tmp);
@@ -103,6 +108,23 @@ class FixedPoint<uint32,bits>{
 
         bool operator==(const Self& another) const noexcept{
             return this->data==another.data;
+        }
+
+        Self operator+(int other) const noexcept{
+            if (other<0){
+                other=-other;
+                other<<=bits;
+                other=-other;
+            }else {
+                other<<=bits;
+            }
+
+            uint32 dat=data+other;
+            return Self(dat);
+        }
+
+        Self operator-(int other) const noexcept{
+            return (*this)-other;
         }
 
         template<uint32 len>
@@ -185,3 +207,14 @@ class FixedPoint<uint32,bits>{
             return FixedPoint<uint32,target>(tmp);
         }
 };
+
+
+template<uint32 bits>
+FixedPoint<uint32,bits> operator+(int a,const FixedPoint<uint32,bits>& b){
+    return b+a;
+}
+
+template<uint32 bits>
+FixedPoint<uint32,bits> operator-(int a,const FixedPoint<uint32,bits>& b){
+    return -b+a;
+}
