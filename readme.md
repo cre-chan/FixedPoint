@@ -13,12 +13,24 @@ e.g. clang-1200.0.32.29
     ```
 - FixedPointのフォルダをコンパイラのincludePathに追加
     ```bash
-    clang++ file -std=c++17 -lc++ -I path/to/FixedPoint/
+    > clang++ file -std=c++17 -lc++ -I path/to/FixedPoint/
     ```
 
+## テスト
+テストケースはtest/フォルダにある。テストを実行する方法は二つある。
+### vscodeを使うテストの仕方
+実行したいファイルを開いて、F5を押す。実行結果はDEBUG CONSOLEに表示される。テストに引っかかったケースにおいて、計算結果と参考値の絶対誤差を出力する。
+
+### コマンドラインでテスト
+ターミナルを開いてFixedPointのトップフォルダを開く。以下の命令を実行する。
+```
+> make compile path/to/test/file output/path
+```
+生成されたファイルをターミナルから実行する。
+
+
 ## ドキュメント
-## クラス
-### **FP32\<bits\>**
+### **クラス　FP32\<bits\>**
 32ビットを使って符号付きの固定小数点小数を表現する。bitsは小数部の長さを表す。bitsは31以下でないと行けない。bitsが31を超える場合コンパイルエラーを起こす。
 #### **構造関数**
 #### FP32\<bits\>(uint32 data)
@@ -222,4 +234,39 @@ assert(c<=d);
 ```
 
 #### operator >=
-\>=と同じです。
+=\<と同じです。
+
+### **クラス FP64\<bits\>**
+64ビットを使って符号付きの固定小数点小数を表現する。bitsは小数部の長さを表す。bitsは63以下でないと行けない。bitsが63を超える場合コンパイルエラーを起こす。
+
+ほとんどの関数の仕様はFP32\<bits\>と同じなため、その違いのみを掲載する。
+
+#### **構造関数**
+#### FP64\<bits\>(uint64 data)
+固定小数点数の二進数表現を指定することで64ビット符号付き小数点を初期化する。fromFloatとfromDoubleの使用を推奨する。
+
+#### **静的メソッド**
+#### FP64\<bits\> fromFloat(float f)
+#### FP64\<bits\> fromDouble(double d)
+倍精度浮動小数を固定小数点数に変換する。
+
+#### **メソッド**
+#### FP3４\<n\> to\<n\>()
+
+#### double toDouble()
+
+#### **演算子**
+#### operator +
+#### operator -
+#### operator *
+#### operator /
+64ビット整数型との計算が可能になる
+
+#### (単項) operator -
+
+#### operator <<
+
+#### operator ==
+
+#### operator <=
+#### operator >=
