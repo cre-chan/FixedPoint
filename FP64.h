@@ -23,6 +23,9 @@ class FixedPoint<uint64,bits>{
         // 二進数データをそのまま指定
         FixedPoint(uint64 dat):data(dat){}
 
+        // コピー関数
+        FixedPoint(const Self& another):data(another.data){}
+
         static Self fromFloat(float v){
             if (v==0.f) return FixedPoint(0);
             // vの中身をそのままbにコピー
