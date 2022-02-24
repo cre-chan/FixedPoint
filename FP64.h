@@ -260,6 +260,20 @@ class FixedPoint<uint64,bits>{
         }
 
         template<uint32 len>
+        bool operator==(const FixedPoint<uint64,len>& another) const noexcept{
+            const uint64 thisint=((long long int)this->data)>>bits, 
+                anotherint=((long long int)another.data)>>len;
+            const uint64 thisfrac=(this->data)<<(63-bits),anotherfrac=another.data<<(63-len);
+            
+            return (thisint==anotherint)&&(thisfrac==anotherfrac);
+        }
+
+        template<uint32 len>
+        bool operator!=(const FixedPoint<uint64,len>& another) const noexcept{
+            return !(*this==another);
+        }
+
+        template<uint32 len>
         bool operator<=(const FixedPoint<uint64,len>& another) const noexcept{
             const uint64 thisint=((long long int)-this->data)>>bits, 
                 anotherint=((long long int)another.data)>>len;

@@ -115,6 +115,20 @@ class FixedPoint<uint32,bits>{
             return this->data==another.data;
         }
 
+        template<uint32 n>
+        bool operator==(const FixedPoint<uint32,n>& another) const noexcept{
+            const uint32 thisint=((int)this->data)>>bits,anotherint=((int)another.data)>>n;
+            const uint32 thisfrac=this->data<<(31-bits),anotherfrac=another.data<<(31-n);
+            uint64 thisext=thisint*(1ull<<32)+thisfrac,anotherext=anotherint*(1ull<<32)+anotherfrac;
+
+            return thisext==anotherext;
+        }
+
+        template<uint32 n>
+        bool operator!=(const FixedPoint<uint32,n>& another) const noexcept{
+            return !((*this)==another);
+        }
+
         Self operator+(int other) const noexcept{
             if (other<0){
                 other=-other;
