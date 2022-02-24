@@ -85,6 +85,11 @@ class FixedPoint<uint64,bits>{
             return FixedPoint(frac);
         }
 
+        // e.g t=-t
+        Self operator-(){
+            return FixedPoint(-data);
+        }
+
         Self operator+(const Self& another) const noexcept{
             uint64 tmp=another.data+this->data;
             return FixedPoint(tmp);
@@ -132,6 +137,91 @@ class FixedPoint<uint64,bits>{
 
         Self operator/(const Self& another) const{
             uint64 op1=this->data,op2=another.data;
+            int sign=0;
+            if (op1&(1ull<<63)) {
+                sign++;
+                op1=-op1;
+            }
+            if (op2&(1ull<<63)) {
+                sign++;
+                op2=-op2;
+            }
+
+            uint64 interger=op1/op2,frac=0;
+            op1%=op2;
+            for(int i=0;i<64;i++){
+                frac<<=1;
+                op1<<=1;
+                uint64 v=op1/op2;
+                frac|=v;
+                
+                op1%=op2;
+            }
+
+            uint64 ret=0;
+            ret|=(interger<<bits);
+            ret|=rsWithCarry(frac,(64-bits));
+
+            
+            if (sign%2) ret=-ret;
+            return FixedPoint(ret);
+        }
+
+        // 64ビット整数との四則計算
+        Self operator+(ll other) const noexcept{
+            if (other<0){
+                other=-other;
+                other<<=bits;
+                other=-other;
+            }else {
+                other<<=bits;
+            }
+
+            uint64 dat=data+other;
+            return Self(dat);
+        }
+
+        Self operator-(ll other) const noexcept{
+            return (*this)-other;
+        }
+
+        Self operator*(ll another) const noexcept{
+            uint64 op1=this->data,op2=another*(1ll<<bits);
+            int sign=0;
+            if (op1&(1<<31)) {
+                sign++;
+                op1=-op1;
+            }
+            if (op2&(1<<31)) {
+                sign++;
+                op2=-op2;
+            }
+
+            uint64 up=0,down=0;
+
+            for(int i=0;i<64;i++){
+                if (((1ull<<i)&op2)==0) continue;
+                uint64 down2=op1<<i,up2=op1>>(63-i);
+                uint64 newdown=down2+down;
+                uint64 downsign=(1ull<<63)&down,
+                    down2sign=(1ull<<63)&down2,
+                    newdownsign=(1ull<<63)&newdown; 
+
+                bool overflowed=(downsign&&down2sign&&!newdownsign)||(!downsign&&!down2sign&&newdownsign);
+                down=newdown;
+                up+=up2;
+                if (overflowed) up++;
+            }
+
+            uint64 tmp=rsWithCarry(down,bits);
+            tmp|=(lsnbits(bits)&up)<<(64-bits);
+
+            if (sign%2) tmp=-tmp;
+            return FixedPoint(tmp);
+        }
+
+        Self operator/(ll another) const{
+            uint64 op1=this->data,op2=another*(1ll<<bits);
             int sign=0;
             if (op1&(1ull<<63)) {
                 sign++;
@@ -254,3 +344,21 @@ class FixedPoint<uint64,bits>{
             return FixedPoint<uint64,target>(tmp);
         }
 };
+
+// ll a=-5;
+// FP64<4> b=FP64<4>::fromDouble(2.)
+// a+b
+template<uint32 bits>
+FixedPoint<uint64,bits> operator+(ll a,const FixedPoint<uint64,bits>& b){
+    return b+a;
+}
+
+template<uint32 bits>
+FixedPoint<uint64,bits> operator-(ll a,const FixedPoint<uint64,bits>& b){
+    return -b+a;
+}
+
+template<uint32 bits>
+FixedPoint<uint64,bits> operator*(ll a,const FixedPoint<uint64,bits>& b){
+    return b*a;
+}
