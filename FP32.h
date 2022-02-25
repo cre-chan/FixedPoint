@@ -116,13 +116,7 @@ class FixedPoint<uint32,bits>{
         }
 
         Self operator+(int other) const noexcept{
-            if (other<0){
-                other=-other;
-                other<<=bits;
-                other=-other;
-            }else {
-                other<<=bits;
-            }
+            other*=(1<<bits);
 
             uint32 dat=data+other;
             return Self(dat);
@@ -140,22 +134,16 @@ class FixedPoint<uint32,bits>{
         }
 
         Self operator/(int another) const{
-            uint32 op1=this->data,op2=another;
-            int sign=0;
-            if (op1&(1<<31)) {
-                sign++;
-                op1=-op1;
-            }
-            if (op2&(1<<31)) {
-                sign++;
-                op2=-op2;
-            }
+            int op1=this->data,op2=another;
 
-            uint64 divisor=((uint64)op2)<<bits;
-            uint64 tmp=(((uint64)op1)<<32)/divisor;
+            ll divisor=((ll)op2)<<bits;
+            // 単純な二進数として扱うために符号なしに変換
+            uint64 tmp=(((ll)op1)<<32)/divisor;
             int offset=32-bits;
-            tmp=rsWithCarry(tmp,offset);
-            if (sign%2) tmp=-tmp;
+            if (tmp>=0)
+                tmp=rsWithCarry(tmp,offset);
+            else
+                tmp=-rsWithCarry(-tmp,offset);
             return FixedPoint(tmp);
         }
 
