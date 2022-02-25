@@ -132,22 +132,10 @@ class FixedPoint<uint32,bits>{
             return (*this)-other;
         }
 
+        // 精度落ちしない
         Self operator*(int another) const noexcept{
-            uint32 op1=this->data,op2=another;
-            int sign=0;
-            if (op1&(1<<31)) {
-                sign++;
-                op1=-op1;
-            }
-            if (op2&(1<<31)) {
-                sign++;
-                op2=-op2;
-            }
-
-            uint64 tmp=((uint64)op1)*((uint64)op2);
-            
-            // tmp>>=bits;
-            if (sign%2) tmp=-tmp;
+            int op1=this->data,op2=another;
+            uint64 tmp=((ll)op1)*((ll)op2);
             return FixedPoint(tmp);
         }
 
