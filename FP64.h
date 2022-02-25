@@ -17,7 +17,7 @@ class FixedPoint<uint64,bits>{
 
     public:
         // シフト操作の挙動を限定するために符号なし64ビット整数を使う
-        uint64 data;
+        const uint64 data;
 
     public:
         // 二進数データをそのまま指定
