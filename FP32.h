@@ -73,21 +73,14 @@ class FixedPoint<uint32,bits>{
         }
 
         Self operator*(const Self& another) const noexcept{
-            uint32 op1=this->data,op2=another.data;
-            int sign=0;
-            if (op1&(1<<31)) {
-                sign++;
-                op1=-op1;
-            }
-            if (op2&(1<<31)) {
-                sign++;
-                op2=-op2;
-            }
-
-            uint64 tmp=((uint64)op1)*((uint64)op2);
+            int op1=this->data,op2=another.data;
+            ll tmp=((ll)op1)*((ll)op2);
             
-            tmp=rsWithCarry(tmp,bits);
-            if (sign%2) tmp=-tmp;
+            if (tmp>=0)
+                tmp=rsWithCarry(tmp,bits);
+            else
+                tmp=-rsWithCarry(-tmp,bits);
+            // if (sign%2) tmp=-tmp;
             return FixedPoint(tmp);
         }
 
