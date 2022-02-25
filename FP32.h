@@ -76,31 +76,24 @@ class FixedPoint<uint32,bits>{
             int op1=this->data,op2=another.data;
             ll tmp=((ll)op1)*((ll)op2);
             
+            // 右シフトからくる誤差を抑えるため
             if (tmp>=0)
                 tmp=rsWithCarry(tmp,bits);
             else
                 tmp=-rsWithCarry(-tmp,bits);
-            // if (sign%2) tmp=-tmp;
+
             return FixedPoint(tmp);
         }
 
         Self operator/(const Self& another) const{
-            uint32 op1=this->data,op2=another.data;
-            int sign=0;
-            if (op1&(1<<31)) {
-                sign++;
-                op1=-op1;
-            }
-            if (op2&(1<<31)) {
-                sign++;
-                op2=-op2;
-            }
-
-            
-            uint64 tmp=(((uint64)op1)<<32)/op2;
+            int op1=this->data,op2=another.data;
+            uint64 tmp=(((ll)op1)<<32)/(ll)op2;
             int offset=32-bits;
-            tmp=rsWithCarry(tmp,offset);
-            if (sign%2) tmp=-tmp;
+            // 右シフトからくる誤差を抑えるため
+            if (tmp>=0)
+                tmp=rsWithCarry(tmp,bits);
+            else
+                tmp=-rsWithCarry(-tmp,bits);
             return FixedPoint(tmp);
         }
 
